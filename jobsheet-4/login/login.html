@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SIMPUS-Mini | Login Petugas</title>
+    <!-- Memanggil CSS utama dari luar folder login -->
+    <link rel="stylesheet" href="../assets/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>SIMPUS-Mini</h1>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+      <nav>
+          <ul>
+              <!-- Arahkan link kembali ke folder utama -->
+              <li><a href="../index.html">Beranda</a></li>
+              <li><a href="../buku/list.html">Daftar Buku</a></li>
+          </ul>
+      </nav>
+      <label for="nav-toggle" class="nav-toggle-label">&#9776;</label>
+    </header>
+
+    <main>
+      <!-- Memakai elemen section yang otomatis menjadi kartu berbayang -->
+      <section>
+        <h2>Login Petugas</h2>
+        <form action="#" method="POST">
+            <div class="form-group">
+                <label for="username">Username :</label>
+                <input type="text" id="username" name="username" placeholder="Masukkan username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password :</label>
+                <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+            </div>
+            
+            <button type="submit">Masuk</button>
+        </form>
+        <p style="margin-top: 15px; text-align: center;">Belum punya akun? <a href="#">Daftar di sini</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2026 SIMPUS-Mini — Jobsheet 4</p>
+    </footer>
+  </body>
+</html>
