@@ -114,6 +114,18 @@ function initValidasiForm() {
     });
 }
 
+function initUpdateConfirm() {
+    const formEdit = document.getElementById("form-edit");
+    if (!formEdit) return;
+
+    formEdit.addEventListener("submit", function (e) {
+        const yakin = confirm("Apakah Anda yakin ingin menyimpan perubahan data ini?");
+        if (!yakin) {
+            e.preventDefault();
+        }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     initNavToggle();
     initHapusConfirm();

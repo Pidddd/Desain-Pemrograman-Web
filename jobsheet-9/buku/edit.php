@@ -28,7 +28,7 @@ if (!$buku) {
         <p class="flash flash-<?php echo $flash['type']; ?>"><?php echo htmlspecialchars($flash['pesan']); ?></p>
     <?php endif; ?>
 
-    <form id="form-tambah" method="post" action="proses_edit.php">
+    <form id="form-edit" method="post" action="proses_edit.php" onsubmit="return confirm('Apakah Anda yakin ingin menyimpan perubahan data buku ini?');">
         <!-- Input hidden ID untuk identifikasi data yang di-UPDATE -->
         <input type="hidden" name="id" value="<?php echo $buku['id']; ?>">
 
