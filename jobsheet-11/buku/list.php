@@ -1,0 +1,111 @@
+<?php
+$page_title = "Daftar Buku";
+include __DIR__ . '/../includes/header.php';
+
+$flash = $_SESSION['flash'] ?? null;
+unset($_SESSION['flash']);
+require __DIR__ . '/../includes/koneksi.php';
+
+// =========================================================
+// 1. BAB 5: PAGINATION & PENCARIAN SISI SERVER
+// =========================================================
+$perPage = 10; // Batas data per halaman
+$page = max(1, (int) ($_GET['page'] ?? 1));
+$offset = ($page - 1) * $perPage;
+$keyword = trim($_GET['q'] ?? '');
+
+if ($keyword !== '') {
+    // 1. Hitung total data yang cocok dengan judul OR pengarang
+    $hitung = $pdo->prepare("SELECT COUNT(*) FROM buku WHERE judul ILIKE :kw OR pengarang ILIKE :kw");
+    $hitung->execute(['kw' => '%' . $keyword . '%']);
+    $totalRows = $hitung->fetchColumn();
+
+    // 2. Ambil data yang cocok di kolom judul OR pengarang
+    $stmt = $pdo->prepare("SELECT * FROM buku WHERE judul ILIKE :kw OR pengarang ILIKE :kw ORDER BY id DESC LIMIT :limit OFFSET :offset");
+    $stmt->bindValue('kw', '%' . $keyword . '%');
+} else {
+    $totalRows = $pdo->query("SELECT COUNT(*) FROM buku")->fetchColumn();
+    $stmt = $pdo->prepare("SELECT * FROM buku ORDER BY id DESC LIMIT :limit OFFSET :offset");
+}
+
+// Bind nilai integer untuk LIMIT dan OFFSET
+$stmt->bindValue('limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue('offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+
+$daftarBuku = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$totalPages = max(1, (int) ceil($totalRows / $perPage));
+?>
+
+<section>
+    <h2>Daftar Buku</h2>
+
+    <?php if ($flash): ?>
+        <p class="flash flash-<?php echo $flash['type']; ?>"><?php echo htmlspecialchars($flash['pesan']); ?></p>
+    <?php endif; ?>
+
+    <!-- Form Pencarian Sisi Server (method="get") -->
+    <form method="get" action="list.php" class="search-box">
+        <label for="search-input">Cari Judul / Pengarang Buku</label>
+        <input type="text" name="q" id="search-input" value="<?php echo htmlspecialchars($keyword); ?>" placeholder="Ketik judul atau pengarang...">
+        <button type="submit">Cari</button>
+        <?php if ($keyword !== ''): ?>
+            <a href="list.php" style="margin-left: 10px;">Reset Filter</a>
+        <?php endif; ?>
+    </form>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Judul</th>
+                    <th>Pengarang</th>
+                    <th>Tahun</th>
+                    <th>Stok</th>
+                    <th>Tanggal Ditambahkan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($daftarBuku)): ?>
+                    <tr>
+                        <td colspan="6">Data buku tidak ditemukan.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($daftarBuku as $buku): ?>
+                        <tr>
+                            <td><?php echo e($buku['judul']); ?></td>
+                            <td><?php echo e($buku['pengarang']); ?></td>
+                            <td><?php echo htmlspecialchars($buku['tahun']); ?></td>
+                            <td><?php echo htmlspecialchars($buku['stok']); ?></td>
+                            <td><?php echo htmlspecialchars($buku['tanggal_ditambahkan'] ?? ''); ?></td>
+                            <td>
+                                <!-- Link Edit membawa parameter ID di URL -->
+                                <a href="edit.php?id=<?php echo $buku['id']; ?>" class="btn-edit">Edit</a>
+
+                                <!-- Form Hapus menggunakan method POST demi keamanan -->
+                                <form action="hapus.php" method="POST" style="display:inline;">
+                                    <?php echo csrf_field(); ?>
+                                    <input type="hidden" name="id" value="<?php echo (int) $buku['id']; ?>">
+                                    <button type="submit" class="btn-delete" onclick="return confirm('Yakin ingin menghapus?');">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. NAVIGASI PAGINATION -->
+    <nav class="pagination">
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="list.php?page=<?php echo $i; ?><?php echo $keyword !== '' ? '&q=' . urlencode($keyword) : ''; ?>"
+                class="<?php echo $i === $page ? 'active' : ''; ?>">
+                <?php echo $i; ?>
+            </a>
+        <?php endfor; ?>
+    </nav>
+</section>
+
+<?php include __DIR__ . '/../includes/footer.php'; ?>
